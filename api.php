@@ -1,5 +1,5 @@
 <?php
-// «هماهنگی مهر هشتم»: the small server that keeps tasks, chat, letters and ideas for the three, so they reach each
+// «هماهنگی مهر هشتم»: the small server that keeps tasks, chat, letters and ideas for the members, so they reach each
 // other even when only one person is online. One endpoint, POST with a JSON body:
 //   { a: 'ping' }                         → { ok: true }
 //   { a: 'login', user, code }            → { ok, token, exp }   (code checked against the same PBKDF2 hashes as app.js)
@@ -12,9 +12,9 @@ header('X-Content-Type-Options: nosniff');
 
 // The code hashes live in config.php beside this file (not in the repository; see config.example.php).
 $USERS = @include __DIR__ . '/config.php';
-if (!is_array($USERS) || count($USERS) !== 3) { http_response_code(500); echo '{"ok":false,"error":"config.php missing"}'; exit; }
+if (!is_array($USERS) || !$USERS) { http_response_code(500); echo '{"ok":false,"error":"config.php missing"}'; exit; }
 define('USERS', $USERS);
-const COLS = ['ideas', 'tasks', 'msgs', 'letters'];
+const COLS = ['ideas', 'tasks', 'msgs', 'letters', 'mins', 'plans'];
 const MAX_BODY = 3000000;      // bytes per request
 const MAX_ITEM = 20000;        // bytes per item
 const TOKEN_DAYS = 30;
@@ -50,7 +50,7 @@ function who($tok) {
 }
 
 $a = $in['a'] ?? '';
-if ($a === 'ping') out(['ok' => true]);
+if ($a === 'ping') out(['ok' => true, 'app' => 'hamahangi']);
 
 if ($a === 'login') {
   $user = $in['user'] ?? ''; $code = (string)($in['code'] ?? '');
